@@ -2,15 +2,19 @@ const express= require('express');
 const path = require('path');
 const mongoose = require('mongoose');
 const ejsmate = require('ejs-mate');
-const catchAsync = require('./helpers/catchAsync');
 const ExpressError = require('./helpers/ExpressError');
 const methodOverride = require('method-override');
-const Restaurant = require('./models/restaurant');
-const {restaurantSchema} = require('./schemas.js');
+const session = require('express-session');
+const flash = require('connect-flash');
+
+
+const restaurants = require('./routes/restaurants');
+const reviews = require('./routes/reviews');
 
 mongoose.connect('mongodb://localhost:27017/eatsdb',{
     useNewUrlParser: true,
-    useUnifiedTopology: true
+    useUnifiedTopology: true,
+    
 });
 
 const db = mongoose.connection;
@@ -23,63 +27,37 @@ const app= express();
 
 app.use(express.urlencoded({ extended: true }))
 app.use(methodOverride('_method'));
+app.use(express.static(path.join(__dirname, 'public')))
+
+const sessionConfig ={
+    secret: 'thisisasecert',
+    resave: false,
+    saveUninitialized: true,
+    cookie: {
+        httpOnly: true,
+        expires: Date.now() + 1000 * 60 * 60 * 24 * 7, //so that users dont stay logged in forever
+        maxAge: 1000 * 60 * 60 * 24 * 7
+    }
+}
+app.use(session(sessionConfig))
+app.use(flash());
+
+app.use((req, res, next) => {   //middleware for flashing success and error msg
+    res.locals.success = req.flash('success');
+    res.locals.error = req.flash('error');
+    next();
+})
 
 app.engine('ejs', ejsmate)
-
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'))
 
-const validateRestaurantInfo = (req, res, next) => {
-        const { error } = restaurantSchema.validate(req.body);
-    if (error) {
-        const msg = error.details.map(el => el.message).join(',')
-        throw new ExpressError(msg, 400)
-    } else {
-        next();
-    }
-}
+app.use('/restaurants', restaurants);
+app.use('/restaurants/:id/reviews', reviews)
 
-app.get('/', (req, res) =>{
+app.get('/', (req, res) => {
     res.send("HOME")
 })
-
-app.get('/restaurants', catchAsync(async (req, res) => {
-    const restaurants = await Restaurant.find({});
-    res.render('restaurants/index', { restaurants })
-}));
-
-app.get('/restaurants/new', (req, res) => {
-    res.render('restaurants/new');
-});
-
-app.post('/restaurants',validateRestaurantInfo, catchAsync(async (req, res, next) => {
-        //if(!req.body.restaurant) throw new ExpressError('Invalid Restaurant Data', 400);
-        const restaurant = new Restaurant(req.body.restaurant);
-        await restaurant.save();
-        res.redirect(`/restaurants/${restaurant._id}`)
-}));
-
-app.get('/restaurants/:id', catchAsync(async (req, res) => {
-    const restaurant = await Restaurant.findById(req.params.id)
-    res.render('restaurants/show', { restaurant });
-}));
-
-app.get('/restaurants/:id/edit', catchAsync(async (req, res) => {
-    const restaurant = await Restaurant.findById(req.params.id)
-    res.render('restaurants/edit', { restaurant });
-}));
-
-app.put('/restaurants/:id',validateRestaurantInfo,catchAsync(async (req, res) => {
-    const { id } = req.params;
-    const restaurant = await Restaurant.findByIdAndUpdate(id, {...req.body.restaurant});
-    res.redirect(`/restaurants/${restaurant._id}`);
-}));
-
-app.delete('/restaurants/:id', catchAsync(async (req, res) => {
-    const { id } = req.params;
-    await Restaurant.findByIdAndDelete(id);
-    res.redirect('/restaurants');
-}));
 
 app.all('*', (req, res, next) => {
     next(new ExpressError('Page Not Found', 404))

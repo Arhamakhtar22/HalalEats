@@ -6,10 +6,14 @@ const ExpressError = require('./helpers/ExpressError');
 const methodOverride = require('method-override');
 const session = require('express-session');
 const flash = require('connect-flash');
+const passport = require('passport');
+const localPassport = require('passport-local');
+const User = require('./models/user');
 
 
-const restaurants = require('./routes/restaurants');
-const reviews = require('./routes/reviews');
+const authRoute = require('./routes/auth');
+const restaurantsRoute = require('./routes/restaurants');
+const reviewsRoute = require('./routes/reviews');
 
 mongoose.connect('mongodb://localhost:27017/eatsdb',{
     useNewUrlParser: true,
@@ -42,18 +46,28 @@ const sessionConfig ={
 app.use(session(sessionConfig))
 app.use(flash());
 
+app.use(passport.initialize());
+app.use(passport.session()); //for presistent login sessions 
+passport.use(new localPassport(User.authenticate())); 
+
+passport.serializeUser(User.serializeUser()); //how to store a user in a session
+passport.deserializeUser(User.deserializeUser()); //how to get the user out of the session
+
+
 app.use((req, res, next) => {   //middleware for flashing success and error msg
     res.locals.success = req.flash('success');
     res.locals.error = req.flash('error');
     next();
 })
 
+
 app.engine('ejs', ejsmate)
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'))
 
-app.use('/restaurants', restaurants);
-app.use('/restaurants/:id/reviews', reviews)
+app.use('/restaurants', restaurantsRoute);
+app.use('/restaurants/:id/reviews', reviewsRoute)
+app.use('/', authRoute);
 
 app.get('/', (req, res) => {
     res.send("HOME")

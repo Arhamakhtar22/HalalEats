@@ -11,6 +11,7 @@ const localPassport = require('passport-local');
 const User = require('./models/user');
 
 
+
 const authRoute = require('./routes/auth');
 const restaurantsRoute = require('./routes/restaurants');
 const reviewsRoute = require('./routes/reviews');
@@ -55,6 +56,7 @@ passport.deserializeUser(User.deserializeUser()); //how to get the user out of t
 
 
 app.use((req, res, next) => {   //middleware for flashing success and error msg
+    res.locals.signedinUser = req.user;
     res.locals.success = req.flash('success');
     res.locals.error = req.flash('error');
     next();

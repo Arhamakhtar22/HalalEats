@@ -3,22 +3,14 @@ const router = express.Router({ mergeParams: true });
 const catchAsync = require('../helpers/catchAsync');
 const Restaurant = require('../models/restaurant');
 const Review = require('../models/review');
-const ExpressError = require('../helpers/ExpressError');
-const { reviewSchema } = require('../schemas.js');
+const { validateReview, loggedIn, isReviewOwner } = require('../auth_middleware');
 
-const validateReview = (req, res, next) => {
-    const { error } = reviewSchema.validate(req.body);
-    if (error) {
-        const msg = error.details.map(el => el.message).join(',')
-        throw new ExpressError(msg, 400)
-    } else {
-        next();
-    }
-}
 
-router.post('/', validateReview, catchAsync(async (req, res) => {
+
+router.post('/', loggedIn, validateReview, catchAsync(async (req, res) => {
     const restaurant = await Restaurant.findById(req.params.id);
     const review = new Review(req.body.review);
+    review.owner = req.user._id //assign that review to the user id
     restaurant.reviews.push(review);
     await review.save();
     await restaurant.save();
@@ -26,7 +18,7 @@ router.post('/', validateReview, catchAsync(async (req, res) => {
     res.redirect(`/restaurants/${restaurant._id}`);
 }));
 
-router.delete('/:reviewId', catchAsync(async (req, res) => {
+router.delete('/:reviewId', loggedIn, isReviewOwner, catchAsync(async (req, res) => {
     const { id, reviewId } = req.params;
     await Restaurant.findByIdAndUpdate(id, { $pull: { reviews: reviewId } });
     await Review.findByIdAndDelete(req.params.reviewId);

@@ -22,6 +22,7 @@ const seedDB = async () => {
         const random1000 = Math.floor(Math.random() *1000);
         //const number = Math.floor(Math.random() *1000000000);
         const resta = new Restaurant({
+            owner: '62609695587730c90dbf8700',
             location: `${cities[random1000].city}, ${cities[random1000].state}`,
             title: `${sample(descriptors)} ${sample(places)}`,
             image: 'https://source.unsplash.com/collection/1028299',

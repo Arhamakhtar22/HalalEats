@@ -4,26 +4,12 @@ const catchAsync = require('../helpers/catchAsync');
 const Restaurant = require('../models/restaurant');
 const Review = require('../models/review');
 const { validateReview, loggedIn, isReviewOwner } = require('../auth_middleware');
+const reviews = require('../controllers/reviews');
 
 
 
-router.post('/', loggedIn, validateReview, catchAsync(async (req, res) => {
-    const restaurant = await Restaurant.findById(req.params.id);
-    const review = new Review(req.body.review);
-    review.owner = req.user._id //assign that review to the user id
-    restaurant.reviews.push(review);
-    await review.save();
-    await restaurant.save();
-    req.flash('success', 'Created new review!')
-    res.redirect(`/restaurants/${restaurant._id}`);
-}));
+router.post('/', loggedIn, validateReview, catchAsync(reviews.createReview));
 
-router.delete('/:reviewId', loggedIn, isReviewOwner, catchAsync(async (req, res) => {
-    const { id, reviewId } = req.params;
-    await Restaurant.findByIdAndUpdate(id, { $pull: { reviews: reviewId } });
-    await Review.findByIdAndDelete(req.params.reviewId);
-    req.flash('success', 'Successfully deleted review')
-    res.redirect(`/restaurants/${id}`);
-}))
+router.delete('/:reviewId', loggedIn, isReviewOwner, catchAsync(reviews.deleteReview));
 
 module.exports = router;

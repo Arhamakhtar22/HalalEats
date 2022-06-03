@@ -25,7 +25,19 @@ const seedDB = async () => {
             owner: '62609695587730c90dbf8700',
             location: `${cities[random1000].city}, ${cities[random1000].state}`,
             title: `${sample(descriptors)} ${sample(places)}`,
-            image: 'https://source.unsplash.com/collection/1028299',
+            image: [
+                {
+                    url: 'https://res.cloudinary.com/dvumzwqo4/image/upload/v1654105245/HalalEats/oeqzthb3lzvxruowgtli.jpg',
+                    filename: 'HalalEats/oeqzthb3lzvxruowgtli',
+                    
+                },
+                {
+                    url: 'https://res.cloudinary.com/dvumzwqo4/image/upload/v1654105246/HalalEats/o3vqj7tsjrzf9aobiwt9.jpg',
+                    filename: 'HalalEats/o3vqj7tsjrzf9aobiwt9',
+                    
+                }
+
+            ],
             description: 'Lorem ipsum, dolor sit amet consectetur adipisicing elit. Et vero tempora eligendi praesentium ad assumenda reiciendis ex error nihil, quam ipsam mollitia totam, nobis vel libero accusantium quia at provident.',
            })
         await resta.save();

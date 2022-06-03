@@ -1,4 +1,5 @@
 const Restaurant = require('../models/restaurant');
+const { cloudinary } = require("../cloudinary");
 
 module.exports.index = async (req, res) => {
     const restaurants = await Restaurant.find({});
@@ -9,10 +10,11 @@ module.exports.newForm = (req, res) =>{
     res.render('restaurants/new');
 }
  module.exports.newRestaurant = async (req, res, next) => {
-    //if(!req.body.restaurant) throw new ExpressError('Invalid Restaurant Data', 400);
     const restaurant = new Restaurant(req.body.restaurant);
+    restaurant.image = req.files.map(f => ({ url: f.path, filename: f.filename }));
     restaurant.owner = req.user._id; //asign that restaurant to the user id
     await restaurant.save();
+    console.log(restaurant)
     req.flash('success', 'Successfully made a new restaurant')
     res.redirect(`/restaurants/${restaurant._id}`)
  }
@@ -51,6 +53,18 @@ module.exports.updateRestaurant = async (req, res) => {
     const restaurant = await Restaurant.findById(id);
     if (restaurant.owner.equals(req.user._id)) {
         const findRestaurant = await Restaurant.findByIdAndUpdate(id, { ...req.body.restaurant });
+        const images = req.files.map(f => ({ url: f.path, filename: f.filename }));
+        restaurant.image.push(...images); //take the data from array above and pass that inti push
+        await restaurant.save()
+        console.log(restaurant)
+        if (req.body.deleteImage){ //if there are any images to delete
+            for (let filename of req.body.deleteImage){
+                await cloudinary.uploader.destroy(filename); //delete the images from cloudinary 
+            }
+            await findRestaurant.updateOne({ $pull: { image: { filename: { $in: req.body.deleteImage }}}}) //pull from the image array, where the filename is in req.body
+            console.log(findRestaurant)
+        }
+        //console.log(req.body)
         req.flash('success', 'Updated successfully!')
         res.redirect(`/restaurants/${restaurant._id}`)
     } else {

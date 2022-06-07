@@ -16,6 +16,7 @@ db.once("open", () => {
 });
 
 const sample = array => array[Math.floor(Math.random() * array.length)];
+
 const seedDB = async () => { 
     await Restaurant.deleteMany({});
     for(let i=0; i< 50; i++){
@@ -25,6 +26,10 @@ const seedDB = async () => {
             owner: '62609695587730c90dbf8700',
             location: `${cities[random1000].city}, ${cities[random1000].state}`,
             title: `${sample(descriptors)} ${sample(places)}`,
+            geometry: {
+                type: "Point",
+                coordinates: [-118.242766, 34.053691]
+            },
             image: [
                 {
                     url: 'https://res.cloudinary.com/dvumzwqo4/image/upload/v1654105245/HalalEats/oeqzthb3lzvxruowgtli.jpg',

@@ -1,8 +1,14 @@
 <% layout('layouts/boilerplate')%>
 <link rel ="stylesheet" href="/stylesheets/stars.css">
 
+<script>
+    const mapToken = '<%-process.env.MAPBOX_TOKEN%>';
+    const restaurant = <%-JSON.stringify(restaurant)%>
+</script>
+
 <div class="row">
     <div class="col-6">
+        <div id='map' style='width: 400px; height: 300px;'></div>
         <div id="restaurantCarousel" class="carousel slide" data-ride="carousel">
             <div class="carousel-inner">
                 <% restaurant.image.forEach((img, i)=> { %>
@@ -99,3 +105,5 @@
 <footer>
     <a href="/restaurants">All Restaurants</a>
 </footer>
+
+<script src="/js/maps.js"></script>

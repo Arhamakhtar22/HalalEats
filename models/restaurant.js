@@ -14,6 +14,17 @@ ImageSchema.virtual('thumbnail').get(function () {
 const RestaurantSchema = new Schema({
     title: String,
     image: [ImageSchema],
+    geometry: {
+        type: {
+            type: String,
+            enum: ['Point'],
+            required: true
+        },
+        coordinates: {
+            type: [Number],
+            required: true
+        }
+    },
     phonenumber: Number,
     description: String,
     location: String,
@@ -39,5 +50,3 @@ RestaurantSchema.post('findOneAndDelete', async function(doc){
     }
 })
 module.exports = mongoose.model('Restaurant', RestaurantSchema);
-
- 

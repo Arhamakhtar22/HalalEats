@@ -22,7 +22,6 @@ module.exports.newForm = (req, res) =>{
     restaurant.image = req.files.map(f => ({ url: f.path, filename: f.filename }));
     restaurant.owner = req.user._id; //asign that restaurant to the user id
     await restaurant.save();
-    console.log(restaurant)
     req.flash('success', 'Successfully made a new restaurant')
     res.redirect(`/restaurants/${restaurant._id}`)
  }

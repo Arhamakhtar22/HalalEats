@@ -13,6 +13,7 @@ const flash = require('connect-flash');
 const passport = require('passport');
 const localPassport = require('passport-local');
 const User = require('./models/user');
+const mongoSanitize = require('express-mongo-sanitize');
 
 
 
@@ -51,6 +52,8 @@ const sessionConfig ={
 app.use(session(sessionConfig))
 app.use(flash());
 
+app.use(mongoSanitize);
+
 app.use(passport.initialize());
 app.use(passport.session()); //for presistent login sessions 
 passport.use(new localPassport(User.authenticate())); 
@@ -76,7 +79,7 @@ app.use('/restaurants/:id/reviews', reviewsRoute)
 app.use('/', authRoute);
 
 app.get('/', (req, res) => {
-    res.send("HOME")
+    res.render('home')
 })
 
 app.all('*', (req, res, next) => {

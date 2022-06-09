@@ -1,13 +1,31 @@
+<link rel="stylesheet" href="/stylesheets/register.css">
 <% layout('layouts/boilerplate')%>
-    <h1>Login</h1>
-    <form action="/login" method="POST" class="validated-form" novalidate>
-        <div class="mb-3">
-            <label class="form-label" for="username">Username</label>
-            <input class="form-control" type="text" id="username" name="username" required>
+<div class="container py-5 h-100">
+    <div class="row d-flex justify-content-center align-items-center h-100">
+        <div class="col-lg-8 col-xl-6">
+            <div class="card rounded-3">
+                <div class="card-body">
+                    <h3 class="card-title">Log in to HalalEats</h3>
+                        <form action="/login" method="POST" class="validated-form" novalidate>
+                            <div class="mb-3">
+                                <label class="form-label" for="username">Username</label>
+                                <input class="form-control" type="text" id="username" name="username" required>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label" for="password">Password</label>
+                                <input class="form-control" type="password" id="password" name="password" required>
+                            </div>
+                            <div class="mb-3">
+                            <button class="btn btn-success">Login</button>
+                            </div>
+                            <div>
+                                <small class="subtle-text"> New to HalaEats?
+                                <a href="/register">Sign up</a>
+                                </small>
+                            </div>
+                        </form>
+                </div>
+            </div>
         </div>
-        <div class="mb-3">
-            <label class="form-label" for="password">Password</label>
-            <input class="form-control" type="password" id="password" name="password" required>
-        </div>
-        <button class="btn btn-success">Login</button>
-    </form>
+    </div>
+</div>

@@ -1,4 +1,4 @@
-if(process.env.NODE_ENV !== "production") {
+if (process.env.NODE_ENV !== "production") {
     require('dotenv').config()
 }
 
@@ -14,6 +14,7 @@ const passport = require('passport');
 const localPassport = require('passport-local');
 const User = require('./models/user');
 const mongoSanitize = require('express-mongo-sanitize');
+const helmet = require('helmet');
 
 
 
@@ -40,6 +41,7 @@ app.use(methodOverride('_method'));
 app.use(express.static(path.join(__dirname, 'public')))
 
 const sessionConfig ={
+    name: 'session',
     secret: 'thisisasecert',
     resave: false,
     saveUninitialized: true,
@@ -51,8 +53,9 @@ const sessionConfig ={
 }
 app.use(session(sessionConfig))
 app.use(flash());
+app.use(helmet());
 
-app.use(mongoSanitize);
+app.use(mongoSanitize());
 
 app.use(passport.initialize());
 app.use(passport.session()); //for presistent login sessions 
@@ -95,3 +98,4 @@ app.use((err, req, res, next) => {
 app.listen(3000, () =>{
     console.log('Serving on port 3000')
 })
+

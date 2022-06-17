@@ -14,14 +14,18 @@ const passport = require('passport');
 const localPassport = require('passport-local');
 const User = require('./models/user');
 const mongoSanitize = require('express-mongo-sanitize');
+const MongoDBStore = require("connect-mongo")(session);
+
+const database_url = process.env.DB_URL || "mongodb://localhost:27017/eatsdb";
 
 
 
 const authRoute = require('./routes/auth');
 const restaurantsRoute = require('./routes/restaurants');
 const reviewsRoute = require('./routes/reviews');
+const MongoStore = require('connect-mongo');
 
-mongoose.connect('mongodb://localhost:27017/eatsdb',{
+mongoose.connect(database_url,{
     useNewUrlParser: true,
     useUnifiedTopology: true,
     
@@ -35,12 +39,25 @@ db.once("open", () => {
 
 const app= express();
 
-app.use(express.urlencoded({ extended: true }))
+app.use(express.urlencoded({ extended: true }));
 app.use(methodOverride('_method'));
-app.use(express.static(path.join(__dirname, 'public')))
+app.use(express.static(path.join(__dirname, 'public')));
+
+const secret = process.env.SECRET || 'sui'
+
+const store = new MongoDBStore({
+    url: database_url,
+    secret,
+    touchAfter: 24 * 60 * 60
+});
+
+store.on("error", function (e) {
+    console.log("SESSION STORE ERROR", e)
+});
 
 const sessionConfig ={
-    secret: 'thisisasecert',
+    store: store,
+    secret,
     resave: false,
     saveUninitialized: true,
     cookie: {

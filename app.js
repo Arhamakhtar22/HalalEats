@@ -52,7 +52,7 @@ const sessionConfig ={
 app.use(session(sessionConfig))
 app.use(flash());
 
-app.use(mongoSanitize);
+app.use(mongoSanitize());
 
 app.use(passport.initialize());
 app.use(passport.session()); //for presistent login sessions 
